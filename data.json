@@ -1,0 +1,53 @@
+{
+    "Name": "Customer",
+    "Description": "Holds information about an individual customer",
+    "Definition": {
+        "Fields": {
+            "id": {
+                "Name": "Id",
+                "Type": "int",
+                "Description": "Identifier for the object",
+                "Optional": false,
+                "Relational":false
+            },
+            "advisor_id": {
+                "Name": "AdvisorId",
+                "Type": "int",
+                "Description": "Advisor",
+                "Optional": true,
+                "Relational":true
+            },
+            "name": {
+                "Name": "Name",
+                "Type": "string",
+                "Description": "Name of the customer",
+                "Optional": false,
+                "Relational":false
+            },
+            "phoneNumber": {
+                "Name": "PhoneNumber",
+                "Type": "string",
+                "Description": "Contact phone number",
+                "Optional": true,
+                "Relational":false
+            }
+        }
+    },
+    "Search": [
+        "name",
+        "phoneNumber"
+    ],
+    "Permissions": {
+        "Key": "real-estate:customer"
+    },
+    "Actions": [
+        "Get",
+        "Paginate",
+        "Infinite",
+        "Create",
+        "CreateBulk",
+        "Update",
+        "Delete",
+        "DeleteBulk"
+    ]
+}

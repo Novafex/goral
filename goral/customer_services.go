@@ -1,47 +1,76 @@
 package goral
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
 
 type ICustomer interface {
-	getCustomer(filter Customer) ([]Customer, error)
-	paginateCustomer(filter Customer) ([]Customer, error)
-	infiniteCustomer(filter Customer) ([]Customer, error)
-	createCustomer(data Customer) (Customer, error)
-	create_bulkCustomer(data []Customer) ([]Customer, error)
-	updateCustomer(id int, data Customer) error
-	deleteCustomer(id int) error
-	delete_bulkCustomer(id int) error
+	GetCustomer(filter Customer) ([]Customer, error)
+	PaginateCustomer(filter Customer) ([]Customer, error)
+	InfiniteCustomer(filter Customer) ([]Customer, error)
+	CreateCustomer(data Customer) (Customer, error)
+	UpdateCustomer(id int, data Customer) error
+	DeleteCustomer(id int) error
 }
 type CustomerService struct{ DB *gorm.DB }
 
-func (c *CustomerService) getCustomer(filter Customer) ([]Customer, error) {
+func (c *CustomerService) GetCustomer(filter Customer) ([]Customer, error) {
+	result := []Customer{}
+	var err error
+	if err = c.DB.Preload(clause.Associations).Model(&Customer{}).Where(filter).Find(&result).Error; err != nil {
+		return result, err
+	}
+	return result, err
+}
+
+func (c *CustomerService) PaginateCustomer(filter Customer) ([]Customer, error) {
 	return []Customer{}, nil
 }
 
-func (c *CustomerService) paginateCustomer(filter Customer) ([]Customer, error) {
+func (c *CustomerService) InfiniteCustomer(filter Customer) ([]Customer, error) {
 	return []Customer{}, nil
 }
 
-func (c *CustomerService) infiniteCustomer(filter Customer) ([]Customer, error) {
-	return []Customer{}, nil
+func (c *CustomerService) CreateCustomer(data Customer) (Customer, error) {
+	var err error
+	if err = c.DB.Create(&data).Error; err != nil {
+		return data, err
+	}
+	return data, err
 }
 
-func (c *CustomerService) createCustomer(data Customer) (Customer, error) {
-	return Customer{}, nil
+func (c *CustomerService) CreateBulkCustomer(data []Customer) ([]Customer, error) {
+	var err error
+	if err = c.DB.CreateInBatches(&data, len(data)).Error; err != nil {
+		return data, err
+	}
+	return data, err
 }
 
-func (c *CustomerService) create_bulkCustomer(data []Customer) ([]Customer, error) {
-	return []Customer{}, nil
+func (c *CustomerService) UpdateCustomer(id int, data Customer) error {
+
+	var err error
+	if err = c.DB.Model(Customer{}).Where("id = ?", id).Updates(&data).Error; err != nil {
+		return err
+	}
+	return err
 }
 
-func (c *CustomerService) updateCustomer(id int, data Customer) error {
-	return nil
+func (c *CustomerService) DeleteCustomer(id int) error {
+	var err error
+	if err = c.DB.Where("id = ?", id).Delete(&Customer{}).Error; err != nil {
+		return err
+	}
+	return err
 }
 
-func (c *CustomerService) deleteCustomer(id int) error {
-	return nil
-}
-
-func (c *CustomerService) delete_bulkCustomer(id int) error {
-	return nil
+func (c *CustomerService) DeleteBulkCustomer(ids []int) error {
+	var err error
+	for _, id := range ids {
+		if err = c.DB.Where("id = ?", id).Delete(&Customer{}).Error; err != nil {
+			return err
+		}
+	}
+	return err
 }
