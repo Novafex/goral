@@ -103,7 +103,7 @@ func generateStructFile(data Data) {
 			file.WriteString(fmt.Sprintf("\t%s %s `%s %s %s`\t// %s\n", fieldData.Name, fieldData.Type, gormTag, jsonTag, swaggertypeTag, fieldData.Description))
 		} else {
 			jsonTag := fieldName
-			gormTag := fmt.Sprintf("gorm:\"column:%s;type:%s\"", fieldData.Name, "nullable")
+			gormTag := fmt.Sprintf("gorm:\"column:%s;%s\"", fieldData.Name, "nullable")
 			jsonTag = fmt.Sprintf("json:\"%s\"", fieldName)
 			swaggertypeTag := "swaggertype:\"string\""
 
