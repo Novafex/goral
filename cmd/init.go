@@ -54,6 +54,8 @@ initially needed files and folders.`,
 
 		initStepStructure(wd)
 		initStepGitIgnore(wd)
+
+		color.HiGreen("\nCompleted initialization!\nTry using \"goral add\" next to make your first declaration.")
 	},
 }
 
@@ -66,12 +68,13 @@ func initStepStructure(wd string) {
 	// Check for existing folder
 	parentDir := filepath.Join(wd, "goral")
 	if pathExists(parentDir) {
-		debugPrint("Goral directory exists")
+		debugPrint("Goral directory exists\n")
 
 		// Check existing configuration
 		if pathExists(filepath.Join(parentDir, "goral.config.yaml")) || pathExists(filepath.Join(parentDir, "goral.config.json")) {
-			debugPrint("Found configuration file")
-			color.HiGreen(`Looks like Goral is already scaffolded...`)
+			debugPrint("Found configuration file\n")
+			color.Green(`Looks like Goral is already scaffolded...`)
+			color.Yellow(`TIP: You can check existing setups using "goral verify"`)
 			return
 		}
 		debugPrint("No configuration file")
@@ -97,7 +100,7 @@ func initStepStructure(wd string) {
 		color.HiRed("failed to write config file to %s", newPath)
 		panic(err)
 	}
-	color.HiGreen(`Created new configuration file at %s...`, newPath)
+	color.Green(`Created new configuration file at %s...`, newPath)
 }
 
 func initStepGitIgnore(wd string) {
@@ -107,12 +110,7 @@ func initStepGitIgnore(wd string) {
 		Label: "Should we append a Git ignore rule to remove Goral generated files?",
 		IsConfirm: true,
 	}
-	answer, err := prompt.Run()
-	if err != nil {
-		color.HiRed("whoops! something failed while asking a question\n")
-		panic(err)
-	}
-
+	answer, _ := prompt.Run()
 	if isYesAnswer(answer) {
 		debugPrint("adding line to .gitignore\n")
 
@@ -126,6 +124,6 @@ func initStepGitIgnore(wd string) {
 
 		f.WriteString(GI_RULE)
 
-		color.HiGreen("Setup .gitignore file for you...")
+		color.Green("Setup .gitignore file for you...")
 	}
 }
