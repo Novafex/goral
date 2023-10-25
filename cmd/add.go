@@ -27,29 +27,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// checkCmd represents the check command
-var checkCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Ensures declarations have the correct schema",
-	Long: `Validates the schema of declaration files to ensure they are correct
-and compilable. It does not verify the project config, nor does it ensure that
-the results are what you actually want.`,
+// addCmd represents the add command
+var addCmd = &cobra.Command{
+	Use:   "add name...",
+	Short: "Makes a new declaration file of the given name",
+	Long: `Use to scaffold a templated declaration file with the given name. By
+default it will use YAML for the format. You can specify more than one name to
+create multiple templates.`,
+	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("check called")
+		fmt.Println("add called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(addCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// checkCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// checkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

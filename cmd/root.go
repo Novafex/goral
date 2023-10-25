@@ -53,7 +53,7 @@ Some features include:
  
 Initialize a project/repository using "goral init" to scaffold the folder
 structure and configurations. From there "goral add" will create new manifests,
-and "goral build" will re-generate the Go files.
+and "goral generate" will re-generate the Go files.
 
 See "goral help" for more information on available commands and options.`,
 }
