@@ -215,20 +215,132 @@ func generateControllerFile(data Data) {
 	file.WriteString("package goral\n\n")
 	file.WriteString(`import (
         "github.com/gofiber/fiber/v2"
+		"strconv"
     )`)
 
 	file.WriteString(fmt.Sprintf("\n\n type %sController struct{ Svc %sService }\n", data.Name, data.Name))
 
 	for _, action := range data.Actions {
 		functionName := action + data.Name
-		file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
-		file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
-		file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
-		file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
-		file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-		file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
-		file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
-		file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error {return nil}\n", data.Name, functionName))
+		switch action {
+		case "Get":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString(fmt.Sprintf("var %s []%s\n\n", strings.ToLower(data.Name), data.Name))
+			file.WriteString(fmt.Sprintf("db := controller.Svc.DB.Table(\"%s\")\n", data.Name))
+			file.WriteString("query := c.Query(\"query\")\n")
+			var queryParts []string
+			var finalQuery string
+			for fieldName, fieldData := range data.Definition.Fields {
+				if fieldData.Relational {
+					file.WriteString(fmt.Sprintf("%s := c.Query(\"%s\")\n", fieldName, fieldName))
+					file.WriteString(fmt.Sprintf("db = db.Where(\"%s = ?\", %s)\n\n", fieldName, fieldName))
+				} else {
+
+					queryPart := fieldData.Name + ` ILIKE"+"%"+ query +"%"+"`
+					queryParts = append(queryParts, queryPart)
+					finalQuery = strings.Join(queryParts, " OR ")
+
+				}
+			}
+			file.WriteString(fmt.Sprintf("finalQuery :=\"%s\" \n", finalQuery))
+			file.WriteString("db = db.Where(finalQuery)\n")
+			file.WriteString("page, err := strconv.Atoi(c.Query(\"page\", \"1\"))\n\n")
+			file.WriteString("if err != nil {\n\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"error\": \"Sayfa numarası geçersiz\"})\n\n}\n\n")
+
+			file.WriteString("perPage, err := strconv.Atoi(c.Query(\"per_page\", \"10\"))\n\n")
+			file.WriteString("if err != nil { \nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\"error\": \"Sayfa başına alınacak kayıt sayısı geçersiz\"})\n\n\n}")
+
+			file.WriteString("\n\noffset := (page - 1) * perPage\nlimit := perPage\n")
+			file.WriteString("db = db.Offset(offset).Limit(limit)\n\n")
+			file.WriteString(fmt.Sprintf("if err := db.Find(&%s).Error; err != nil {return err\n\n}", strings.ToLower(data.Name)))
+			file.WriteString(fmt.Sprintf("\nreturn c.JSON(%s)\n}", strings.ToLower(data.Name)))
+		case "Paginate":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Infinite":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Create":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Create_bulk":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Update":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Delete":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		case "Delete_bulk":
+			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
+			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
+
+			file.WriteString("\nreturn nil\n}")
+		}
+
 	}
 
 	fmt.Printf("%s dosyası başarıyla oluşturuldu.\n", fileName)
