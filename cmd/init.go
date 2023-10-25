@@ -22,20 +22,74 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
+	Use:   "init [path]",
 	Short: "Initialize Goral within the current working directory",
 	Long: `Initializes the current folder (project) to use Goral by creating the
 initially needed files and folders.`,
 
+	Args: cobra.MaximumNArgs(1),
+
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("init called")
+		color.Cyan("Welcome to Goral\n\n")
+		
+		// Find the base CWD
+		var pathAdd string
+		if len(args) == 1 {
+			pathAdd = filepath.Clean(args[0])
+		}
+		cwd, _ := os.Getwd()
+		wd := filepath.Join(cwd, pathAdd)
+
+		debugPrint("Current working directory: %s\n", wd)
+
+		// Check for existing folder
+		parentDir := filepath.Join(wd, "goral")
+		if pathExists(parentDir) {
+			debugPrint("Goral directory exists")
+
+			// Check existing configuration
+			if pathExists(filepath.Join(parentDir, "goral.config.yaml")) || pathExists(filepath.Join(parentDir, "goral.config.json")) {
+				debugPrint("Found configuration file")
+				color.HiGreen(`Looks like Goral is already initialized, use "goral check -a" to ensure everything is good!`)
+				return
+			}
+			debugPrint("No configuration file")
+
+			// Make a blank configuration
+			newPath := filepath.Join(parentDir, "goral.config.yaml")
+			if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
+				color.HiRed("failed to write config file to %s", newPath)
+				color.Red("%s", err.Error())
+				return
+			}
+			color.HiGreen(`Created new configuration file at %s, ready to start using!`, newPath)
+			return
+		}
+
+		// Scaffold the whole thing
+		if err := os.MkdirAll(parentDir, 1777); err != nil {
+			color.HiRed("failed to create new directory %s", parentDir)
+			color.Red("%s", err.Error())
+			return
+		}
+
+		// Make a blank configuration
+		newPath := filepath.Join(parentDir, "goral.config.yaml")
+		if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
+			color.HiRed("failed to write config file to %s", newPath)
+			color.Red("%s", err.Error())
+			return
+		}
+		color.HiGreen(`Created new configuration file at %s, ready to start using!`, newPath)
 	},
 }
 

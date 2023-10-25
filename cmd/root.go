@@ -102,3 +102,14 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 }
+
+func debugPrint(format string, args ...any) {
+	if optDebug {
+		fmt.Printf(format, args...)
+	}
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
