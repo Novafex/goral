@@ -4,14 +4,8 @@ Go tool for generating CRUD back-ends services using a unified manifest file for
 
 ![Chinese Goral](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Nemorhaeduscaudatusarnouxianus.JPG/1280px-Nemorhaeduscaudatusarnouxianus.JPG)
 
-## Repository Rules
+## See Also
 
-- `main` branch is reserved for production facing code.
-- `beta` branch holds release-candidate next versions.
-- `develop` is for current development usage.
-- Use slash-elimited prefixes for specific tasks based on their type:
-  - `issue/*` using the issue ID for tasks in the Issues page
-  - `feature/*` with a name for large feature branches
-  - `task/*` for mundane tasks like linting or small refactors
-
-Work in the develop and prefixed branches only. When we are ready, we will merge into `beta` and then `main` with their respective PRs and tags.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) for community guidelines
+- [STANDARDS.md](./STANDARDS.md) for coding and development standards
+- [LICENSE](./LICENSE) for MIT license declaration
