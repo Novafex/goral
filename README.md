@@ -1,8 +1,22 @@
 # Goral
 
-Go tool for generating CRUD back-ends services using a unified manifest file format.
+Go tool for generating CRUD back-end services using a unified manifest file format.
 
-![Chinese Goral](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Nemorhaeduscaudatusarnouxianus.JPG/1280px-Nemorhaeduscaudatusarnouxianus.JPG)
+![Gary the Goral](./docs/goral.png)
+
+Goral is useful for quickly making, and maintaining simple CRUD style REST-is
+API servers. These are services that generally Create-Retrieve-Update-Delete
+resources connected to a database. Instead of the monotony of repeatedly making
+struct-types and endpoints for the same patterns, let Goral do it instead.
+
+Using a simple manifest declaring the data outline, it can generate all the
+useful code for you.
+
+* Automatic struct generation for resources
+* Endpoint binding for web servers
+* SQL generation scripts for building the schema
+* Exporting TypeScript declarations
+* And much more...
 
 ## Installation
 
