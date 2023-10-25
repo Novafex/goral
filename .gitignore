@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+# Goral generated files
+*_goral.go
