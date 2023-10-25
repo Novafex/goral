@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
@@ -51,48 +52,80 @@ initially needed files and folders.`,
 
 		debugPrint("Current working directory: %s\n", wd)
 
-		// Check for existing folder
-		parentDir := filepath.Join(wd, "goral")
-		if pathExists(parentDir) {
-			debugPrint("Goral directory exists")
-
-			// Check existing configuration
-			if pathExists(filepath.Join(parentDir, "goral.config.yaml")) || pathExists(filepath.Join(parentDir, "goral.config.json")) {
-				debugPrint("Found configuration file")
-				color.HiGreen(`Looks like Goral is already initialized, use "goral check -a" to ensure everything is good!`)
-				return
-			}
-			debugPrint("No configuration file")
-
-			// Make a blank configuration
-			newPath := filepath.Join(parentDir, "goral.config.yaml")
-			if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
-				color.HiRed("failed to write config file to %s", newPath)
-				color.Red("%s", err.Error())
-				return
-			}
-			color.HiGreen(`Created new configuration file at %s, ready to start using!`, newPath)
-			return
-		}
-
-		// Scaffold the whole thing
-		if err := os.MkdirAll(parentDir, 1777); err != nil {
-			color.HiRed("failed to create new directory %s", parentDir)
-			color.Red("%s", err.Error())
-			return
-		}
-
-		// Make a blank configuration
-		newPath := filepath.Join(parentDir, "goral.config.yaml")
-		if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
-			color.HiRed("failed to write config file to %s", newPath)
-			color.Red("%s", err.Error())
-			return
-		}
-		color.HiGreen(`Created new configuration file at %s, ready to start using!`, newPath)
+		initStepStructure(wd)
+		initStepGitIgnore(wd)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+}
+
+
+func initStepStructure(wd string) {
+	// Check for existing folder
+	parentDir := filepath.Join(wd, "goral")
+	if pathExists(parentDir) {
+		debugPrint("Goral directory exists")
+
+		// Check existing configuration
+		if pathExists(filepath.Join(parentDir, "goral.config.yaml")) || pathExists(filepath.Join(parentDir, "goral.config.json")) {
+			debugPrint("Found configuration file")
+			color.HiGreen(`Looks like Goral is already scaffolded...`)
+			return
+		}
+		debugPrint("No configuration file")
+
+		// Make a blank configuration
+		newPath := filepath.Join(parentDir, "goral.config.yaml")
+		if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
+			color.HiRed("failed to write config file to %s", newPath)
+			panic(err)
+		}
+		color.HiGreen(`Created new configuration file at %s...`, newPath)
+	}
+
+	// Scaffold the whole thing
+	if err := os.MkdirAll(parentDir, 1777); err != nil {
+		color.HiRed("failed to create new directory %s", parentDir)
+		panic(err)
+	}
+
+	// Make a blank configuration
+	newPath := filepath.Join(parentDir, "goral.config.yaml")
+	if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
+		color.HiRed("failed to write config file to %s", newPath)
+		panic(err)
+	}
+	color.HiGreen(`Created new configuration file at %s...`, newPath)
+}
+
+func initStepGitIgnore(wd string) {
+	const GI_RULE = "\n# Goral generated files\n*_goral.go\n"
+
+	prompt := promptui.Prompt{
+		Label: "Should we append a Git ignore rule to remove Goral generated files?",
+		IsConfirm: true,
+	}
+	answer, err := prompt.Run()
+	if err != nil {
+		color.HiRed("whoops! something failed while asking a question\n")
+		panic(err)
+	}
+
+	if isYesAnswer(answer) {
+		debugPrint("adding line to .gitignore\n")
+
+		pathGI := filepath.Join(wd, ".gitignore")
+		f, err := os.OpenFile(pathGI, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			color.HiRed("could not open file %s", pathGI)
+			panic(err)
+		}
+		defer f.Close()
+
+		f.WriteString(GI_RULE)
+
+		color.HiGreen("Setup .gitignore file for you...")
+	}
 }

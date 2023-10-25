@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -112,4 +113,9 @@ func debugPrint(format string, args ...any) {
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
 	return !os.IsNotExist(err)
+}
+
+func isYesAnswer(answer string) bool {
+	char := strings.TrimSpace(strings.ToLower(answer))[0]
+	return char == 'y'
 }
