@@ -77,37 +77,35 @@ func createDirectories(directories []string) {
 	}
 }
 
+func createFieldTags(fieldName, columnName, typeName string) (string, string) {
+	jsonTag := fmt.Sprintf("json:\"%s\"", fieldName)
+	gormTag := fmt.Sprintf("gorm:\"column:%s;type:%s\"", columnName, typeName)
+	return jsonTag, gormTag
+}
+
 func generateStructFile(data Data) {
 	fileName := "goral/" + strings.ToLower(data.Name) + "_types.go"
 	file, err := os.Create(fileName)
 	if err != nil {
-		fmt.Println("Dosya oluşturma hatası:", err)
+		log.Fatalf("Dosya oluşturma hatası: %v", err)
 		return
 	}
 	defer file.Close()
 
+	structName := strings.Title(data.Name)
 	file.WriteString("package goral\n\n")
-	file.WriteString(fmt.Sprintf("type %s struct {\n", data.Name))
+	file.WriteString(fmt.Sprintf("type %s struct {\n", structName))
+
 	for fieldName, fieldData := range data.Definition.Fields {
+		jsonTag, gormTag := createFieldTags(fieldName, fieldData.Name, fieldData.Type)
+
 		if !fieldData.Relational {
-			jsonTag := fieldName
-
-			if fieldData.Optional {
-				jsonTag += ",omitempty"
-			}
-
-			gormTag := fmt.Sprintf("gorm:\"column:%s;type:%s\"", fieldData.Name, fieldData.Type)
-			jsonTag = fmt.Sprintf("json:\"%s\"", fieldName)
 			swaggertypeTag := "swaggertype:\"string\""
-
 			file.WriteString(fmt.Sprintf("\t%s %s `%s %s %s`\t// %s\n", fieldData.Name, fieldData.Type, gormTag, jsonTag, swaggertypeTag, fieldData.Description))
 		} else {
-			jsonTag := fieldName
-			gormTag := fmt.Sprintf("gorm:\"column:%s;%s\"", fieldData.Name, "nullable")
-			jsonTag = fmt.Sprintf("json:\"%s\"", fieldName)
+			jsonTag, gormTag = createFieldTags(fieldName, fieldData.Name, "nullable")
 			swaggertypeTag := "swaggertype:\"string\""
-
-			file.WriteString(fmt.Sprintf("\t%s %s `%s %s %s`\t// %s\n", fieldData.Name, "*"+fieldData.Description, gormTag, jsonTag, swaggertypeTag, fieldData.Description))
+			file.WriteString(fmt.Sprintf("\t%s *%s `%s %s %s`\t// %s\n", fieldData.Name, fieldData.Description, gormTag, jsonTag, swaggertypeTag, fieldData.Description))
 		}
 	}
 	file.WriteString("}\n")
@@ -263,7 +261,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("if err := db.Find(&%s).Error; err != nil {return err\n\n}", strings.ToLower(data.Name)))
 			file.WriteString(fmt.Sprintf("\nreturn c.JSON(%s)\n}", strings.ToLower(data.Name)))
 		case "Paginate":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -274,7 +272,7 @@ func generateControllerFile(data Data) {
 
 			file.WriteString("\nreturn nil\n}")
 		case "Infinite":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -285,7 +283,7 @@ func generateControllerFile(data Data) {
 
 			file.WriteString("\nreturn nil\n}")
 		case "Create":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -293,10 +291,19 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-
-			file.WriteString("\nreturn nil\n}")
-		case "Create_bulk":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("data := %s{}\n\n", data.Name))
+			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
+			file.WriteString(fmt.Sprintf("\n\nresult, rerr := controller.Svc.%s(data)\n", functionName))
+			file.WriteString(`
+			if rerr != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"type":    "Create Data",
+					"message": rerr.Error(),
+				})
+			}`)
+			file.WriteString("\n\nreturn c.Status(fiber.StatusOK).JSON(result)\n}")
+		case "CreateBulk":
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -304,10 +311,19 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-
-			file.WriteString("\nreturn nil\n}")
+			file.WriteString(fmt.Sprintf("data := []%s{}\n\n", data.Name))
+			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
+			file.WriteString(fmt.Sprintf("\n\nresult, rerr := controller.Svc.%s(data)\n", functionName))
+			file.WriteString(`
+			if rerr != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"type":    "Create Data",
+					"message": rerr.Error(),
+				})
+			}`)
+			file.WriteString("\n\nreturn c.Status(fiber.StatusOK).JSON(result)\n}")
 		case "Update":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -315,10 +331,26 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-
-			file.WriteString("\nreturn nil\n}")
+			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
+			file.WriteString(fmt.Sprintf("editData:= %s{}\n\n", data.Name))
+			file.WriteString(`if err := c.BodyParser(&editData); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"type": "Invalid Data",
+				"message": err.Error(),
+			})}`)
+			file.WriteString(fmt.Sprintf("\n\nuerr := controller.Svc.%s(id, editData)\n\n", functionName))
+			file.WriteString(`if uerr != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"type":    "Update Data",
+				"message": uerr.Error(),
+			})}
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"succes":  true,
+				"message": "Updated Successfully",
+				"type":    "Update Data",
+			})}`)
 		case "Delete":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
@@ -326,10 +358,22 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-
-			file.WriteString("\nreturn nil\n}")
-		case "Delete_bulk":
-			file.WriteString(fmt.Sprintf("// Show%s godoc\n", data.Name))
+			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
+			file.WriteString(fmt.Sprintf("\n\nerr := controller.Svc.%s(id)\n\n", functionName))
+			file.WriteString(`	if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"type":    "Delete Data",
+					"message": err.Error(),
+				})
+			}
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"message": "Deleted Successfully",
+				"type":    "Delete Data",
+				"success": true,
+			})
+		}`)
+		case "DeleteBulk":
+			file.WriteString(fmt.Sprintf("\n\n// Show%s godoc\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Summary Show %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
