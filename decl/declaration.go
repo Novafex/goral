@@ -25,9 +25,11 @@ package decl
 // resource to be generated.
 type Declaration struct {
 	// Name is the proper written name of the resource. It can include spaces
-	// and should be title-case. Generators will handle it for generation.
+	// and should be title-cased. Generators will handle formatting it for
+	// generation.
 	Name string `yaml:"name" toml:"name" json:"name"`
 
 	// Description holds a short text explaining what the resource represents.
+	// This is used in documentation snippets to help describe the object.
 	Description string `yaml:"description" toml:"description" json:"description"`
 }
