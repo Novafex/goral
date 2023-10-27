@@ -32,4 +32,8 @@ type Declaration struct {
 	// Description holds a short text explaining what the resource represents.
 	// This is used in documentation snippets to help describe the object.
 	Description string `yaml:"description" toml:"description" json:"description"`
+
+	// Properties holds the sub-data structure for this resource and all the
+	// data that is a child of this resource.
+	Properties []Property `yaml:"properties" toml:"properties" json:"properties"`
 }

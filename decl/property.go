@@ -1,5 +1,9 @@
 package decl
 
+type Property interface {
+	Base() *BaseProperty
+}
+
 // Property describes any field that is a part of a resource declaration. It is
 // called "Property" because Field is already common in Go reflect, so I didn't
 // want to confuse code. Also, JS generally calls them properties.
@@ -10,7 +14,7 @@ package decl
 //
 // Note that this is sort of a base type or interface because depending on the
 // type, it can declare other fields specific to that type.
-type Property struct {
+type BaseProperty struct {
 	// Name is the title-case displayable name for the property.
 	//
 	// These are title case (with spaces, properly named) so that generators can
@@ -32,42 +36,46 @@ type Property struct {
 	Optional bool `yaml:"optional" toml:"optional" json:"optional"`
 }
 
+func (pt *BaseProperty) Base() *BaseProperty {
+	return pt
+}
+
 type BooleanProperty struct {
-	*Property
+	*BaseProperty
 
 	Default bool `yaml:"default" toml:"default" json:"default"`
 }
 
 type ByteProperty struct {
-	*Property
+	*BaseProperty
 
 	Default byte `yaml:"default" toml:"default" json:"default"`
 }
 
 type IntegerProperty struct {
-	*Property
+	*BaseProperty
 
 	Default int `yaml:"default" toml:"default" json:"default"`
 }
 
 type FloatProperty struct {
-	*Property
+	*BaseProperty
 
 	Default float32 `yaml:"default" toml:"default" json:"default"`
 }
 
 type StringProperty struct {
-	*Property
+	*BaseProperty
 
 	Default string `yaml:"default" toml:"default" json:"default"`
 }
 
 type ObjectProperty struct {
-	*Property
+	*BaseProperty
 
 	Default any `yaml:"default" toml:"default" json:"default"`
 }
 
 type ReferenceProperty struct {
-	*Property
+	*BaseProperty
 }
