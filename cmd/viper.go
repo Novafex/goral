@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/novafex/goral/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -26,7 +28,7 @@ func initConfig() {
 		viper.SetConfigName(CONFIG_NAME)
 
 		// Figure out the type by checking if one we like exists
-		_, cfgType := checkForStandardConfigs(cwd)
+		_, cfgType := fs.FindPathWithExtensions(filepath.Join(cwd, CONFIG_NAME))
 		viper.SetConfigType(cfgType)
 	}
 

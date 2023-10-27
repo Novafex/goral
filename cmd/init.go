@@ -27,6 +27,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
+	"github.com/novafex/goral/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -42,7 +43,7 @@ initially needed files and folders.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		color.Cyan("Welcome to Goral\n\n")
-		
+
 		// Find the base CWD
 		var pathAdd string
 		if len(args) == 1 {
@@ -66,7 +67,7 @@ func init() {
 func initStepStructure(wd string) {
 	// Ensure folder structure
 	parentDir := filepath.Join(wd, "goral")
-	if pathExists(parentDir) {
+	if fs.DirExists(parentDir) {
 		debugPrint("Goral directory exists\n")
 	} else if err := os.MkdirAll(parentDir, 1777); err != nil {
 		color.HiRed("failed to create new directory %s", parentDir)
@@ -74,7 +75,7 @@ func initStepStructure(wd string) {
 	}
 
 	// Check existing configuration
-	cfgExists, _ := checkForStandardConfigs(wd)
+	cfgExists, _ := fs.FindPathWithExtensions(filepath.Join(wd, CONFIG_NAME))
 	if cfgExists {
 		debugPrint("Found configuration file\n")
 		color.Green(`Looks like Goral is already scaffolded...`)
@@ -84,7 +85,7 @@ func initStepStructure(wd string) {
 		debugPrint("No configuration file")
 
 		// Make a blank configuration
-		newPath := filepath.Join(wd, CONFIG_NAME + "." + configExtensions[0])
+		newPath := filepath.Join(wd, CONFIG_NAME+"."+fs.GetExtensionOrder()[0])
 		viper.WriteConfigAs(newPath)
 		color.HiGreen(`Created new configuration file at %s...`, newPath)
 	}
@@ -94,7 +95,7 @@ func initStepGitIgnore(wd string) {
 	const GI_RULE = "\n# Goral generated files\n*_goral.go\n"
 
 	prompt := promptui.Prompt{
-		Label: "Should we append a Git ignore rule to remove Goral generated files?",
+		Label:     "Should we append a Git ignore rule to remove Goral generated files?",
 		IsConfirm: true,
 	}
 	answer, _ := prompt.Run()

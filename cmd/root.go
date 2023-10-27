@@ -26,13 +26,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/novafex/goral/fs"
 	"github.com/spf13/cobra"
 )
 
 const (
-	// Specifies the target directory from the root project folders perspective
-	TARGET_DIR = "goral"
-
 	// Target name of the configuration file
 	CONFIG_NAME = "goral"
 )
@@ -44,13 +42,6 @@ var (
 	// goral target directory
 	gtd string
 
-	// declares the accepted extensions for config, in order
-	configExtensions = []string{
-		"toml",
-		"yaml",
-		"json",
-	}
-
 	// configuration file target (set by flag)
 	optCfgFile string
 
@@ -60,9 +51,9 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "goral",
+	Use:     "goral",
 	Version: "0.1.0-alpha",
-	Short: "CRUD API generator for Go",
+	Short:   "CRUD API generator for Go",
 	Long: `Automatically generates Go code designed for REST-ish API generation
 based on manifest files. With Goral entire back-end services can be generated
 using a few configuration (manifest) files written in YAML/JSON.
@@ -101,7 +92,7 @@ func init() {
 	}
 
 	// Build target directory
-	gtd = filepath.Join(cwd, TARGET_DIR)
+	gtd = filepath.Join(cwd, fs.GORAL_DIR)
 
 	// Cobra can initialize the configuration
 	cobra.OnInitialize(initConfig)
