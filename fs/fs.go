@@ -25,6 +25,12 @@ package fs
 
 import "os"
 
+const (
+	// GORAL_DIR holds the string that specifies the folder within the project
+	// root we are looking for with declarations and generators.
+	GORAL_DIR = "goral"
+)
+
 var (
 	extensionOrder = []string{
 		"yaml",
