@@ -23,7 +23,12 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 
+	"github.com/fatih/color"
+	"github.com/novafex/goral/decl"
+	"github.com/novafex/goral/fs"
+	"github.com/novafex/goral/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +42,23 @@ create multiple templates.`,
 	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		name := args[0]
+		if len(name) == 0 {
+			cobra.CheckErr("missing argument for command \"add\"")
+		}
+
+		filename := utils.ToKebabCase(name)
+		base := filepath.Join(gtd, filename)
+		ext := fs.GetExtensionOrder()[0]
+		path := fs.CombineBaseExt(base, ext)
+		if fs.FileExists(path) {
+			cobra.CheckErr(fmt.Errorf("declaration %s already exists", filename))
+		}
+
+		if err := fs.Write(decl.ExampleDeclaration, base, ext); err != nil {
+			cobra.CheckErr(err)
+		}
+		color.HiGreen("Created new declaration at %s", path)
 	},
 }
 

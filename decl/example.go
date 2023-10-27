@@ -6,13 +6,11 @@ var ExampleDeclaration = Declaration{
 	Name:        "My Resource",
 	Description: "Enter your description of this resource type",
 	Properties: []Property{
-		BooleanProperty{
-			BaseProperty: &BaseProperty{
-				Name:        "Example",
-				Description: "Enter a description of this property",
-				Type:        PropertyTypeBoolean,
-			},
-			Default: true,
+		{
+			Name:        "Example",
+			Description: "Enter a description of this property",
+			Type:        PropertyTypeBoolean,
+			Default:     true,
 		},
 	},
 }
