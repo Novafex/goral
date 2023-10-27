@@ -28,6 +28,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // initCmd represents the init command
@@ -47,7 +48,6 @@ initially needed files and folders.`,
 		if len(args) == 1 {
 			pathAdd = filepath.Clean(args[0])
 		}
-		cwd, _ := os.Getwd()
 		wd := filepath.Join(cwd, pathAdd)
 
 		debugPrint("Current working directory: %s\n", wd)
@@ -63,44 +63,31 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 }
 
-
 func initStepStructure(wd string) {
-	// Check for existing folder
+	// Ensure folder structure
 	parentDir := filepath.Join(wd, "goral")
 	if pathExists(parentDir) {
 		debugPrint("Goral directory exists\n")
-
-		// Check existing configuration
-		if pathExists(filepath.Join(parentDir, "goral.config.yaml")) || pathExists(filepath.Join(parentDir, "goral.config.json")) {
-			debugPrint("Found configuration file\n")
-			color.Green(`Looks like Goral is already scaffolded...`)
-			color.Yellow(`TIP: You can check existing setups using "goral verify"`)
-			return
-		}
-		debugPrint("No configuration file")
-
-		// Make a blank configuration
-		newPath := filepath.Join(parentDir, "goral.config.yaml")
-		if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
-			color.HiRed("failed to write config file to %s", newPath)
-			panic(err)
-		}
-		color.HiGreen(`Created new configuration file at %s...`, newPath)
-	}
-
-	// Scaffold the whole thing
-	if err := os.MkdirAll(parentDir, 1777); err != nil {
+	} else if err := os.MkdirAll(parentDir, 1777); err != nil {
 		color.HiRed("failed to create new directory %s", parentDir)
 		panic(err)
 	}
 
-	// Make a blank configuration
-	newPath := filepath.Join(parentDir, "goral.config.yaml")
-	if err := os.WriteFile(newPath, []byte(""), 0771); err != nil {
-		color.HiRed("failed to write config file to %s", newPath)
-		panic(err)
+	// Check existing configuration
+	cfgExists, _ := checkForStandardConfigs(wd)
+	if cfgExists {
+		debugPrint("Found configuration file\n")
+		color.Green(`Looks like Goral is already scaffolded...`)
+		color.Yellow(`TIP: You can check existing setups using "goral verify"`)
+		return
+	} else {
+		debugPrint("No configuration file")
+
+		// Make a blank configuration
+		newPath := filepath.Join(wd, CONFIG_NAME + "." + configExtensions[0])
+		viper.WriteConfigAs(newPath)
+		color.HiGreen(`Created new configuration file at %s...`, newPath)
 	}
-	color.Green(`Created new configuration file at %s...`, newPath)
 }
 
 func initStepGitIgnore(wd string) {

@@ -24,14 +24,37 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-var (
-	cfgFile string
 
+const (
+	// Specifies the target directory from the root project folders perspective
+	TARGET_DIR = "goral"
+
+	// Target name of the configuration file
+	CONFIG_NAME = "goral"
+)
+
+var (
+	// current working directory
+	cwd string
+
+	// goral target directory
+	gtd string
+
+	// declares the accepted extensions for config, in order
+	configExtensions = []string{
+		"toml",
+		"yaml",
+		"json",
+	}
+
+	// configuration file target (set by flag)
+	optCfgFile string
+
+	// whether to use Debug mode
 	optDebug bool
 )
 
@@ -68,54 +91,25 @@ func Execute() {
 }
 
 func init() {
+	var err error
+
+	// Setup the current working directory
+	cwd, err = os.Getwd()
+	if err != nil {
+		// Cobra will exit from this
+		cobra.CheckErr(fmt.Errorf("failed to get current working directory: %s", err.Error()))
+	}
+
+	// Build target directory
+	gtd = filepath.Join(cwd, TARGET_DIR)
+
+	// Cobra can initialize the configuration
 	cobra.OnInitialize(initConfig)
 
 	// === Configuration settings ===
+	setDefaultConfig()
 
 	// === Persistent flags ===
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.goral.yaml)")
+	rootCmd.PersistentFlags().StringVar(&optCfgFile, "config", "", "config file (default is ./goral.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&optDebug, "debug", "D", false, "enables debug logging")
-
-	// === Local flags ===
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".goral" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".goral")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
-}
-
-func debugPrint(format string, args ...any) {
-	if optDebug {
-		fmt.Printf(format, args...)
-	}
-}
-
-func pathExists(path string) bool {
-	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
-}
-
-func isYesAnswer(answer string) bool {
-	char := strings.TrimSpace(strings.ToLower(answer))[0]
-	return char == 'y'
 }
