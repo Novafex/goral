@@ -2,7 +2,7 @@ name: My Resource
 description: Enter your description of this resource type
 properties:
     - name: Example
-      description: Enter a description of this property
-      type: 1
-      optional: false
-      default: true
+      description: Super duper thing
+      type: boolean
+      optional: no
+      default: false

@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -112,4 +113,17 @@ func FindAllWithExtensions(dir string) ([]string, error) {
 	}
 
 	return results, nil
+}
+
+// HasExtension checks if the given path has one of the accepted extensions. It
+// returns true if it does, and returns the extension as it is found in
+// [GetExtensionOrder].
+func HasExtension(path string) (bool, string) {
+	check := strings.ToLower(filepath.Ext(path)[1:])
+	for _, ext := range extensionOrder {
+		if ext == check {
+			return true, ext
+		}
+	}
+	return false, ""
 }
