@@ -1,0 +1,8 @@
+name: My Resource
+description: Enter your description of this resource type
+properties:
+    - name: Example
+      description: Enter a description of this property
+      type: boolean
+      optional: false
+      default: true

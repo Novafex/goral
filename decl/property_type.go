@@ -3,6 +3,8 @@ package decl
 import (
 	"fmt"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // PropertyType masks the string property type in an integer so that Go can
@@ -62,6 +64,14 @@ func (pt PropertyType) Valid() bool {
 	return pt > PropertyTypeInvalid && pt <= PropertyTypeReference
 }
 
+func (pt PropertyType) MarshalText() ([]byte, error) {
+	return []byte(pt.String()), nil
+}
+
+func (pt PropertyType) MarshalYAML() (any, error) {
+	return pt.String(), nil
+}
+
 // UnmarshalText implements the text unmarshaler, which is used by most other
 // formats such as JSON to unmarshal string fields.
 //
@@ -72,6 +82,11 @@ func (pt *PropertyType) UnmarshalText(src []byte) error {
 		return fmt.Errorf("invalid property type %s", src)
 	}
 	return nil
+}
+
+func (pt *PropertyType) UnmarshalYAML(value *yaml.Node) error {
+	str := value.Value
+	return pt.UnmarshalText([]byte(str))
 }
 
 // ParsePropertyType reads an incoming string and finds a matching property type
