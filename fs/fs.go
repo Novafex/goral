@@ -23,7 +23,11 @@
 // THE SOFTWARE.
 package fs
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
 
 const (
 	// GORAL_DIR holds the string that specifies the folder within the project
@@ -81,4 +85,33 @@ func FindPathWithExtensions(base string) (bool, string) {
 		}
 	}
 	return false, extensionOrder[0]
+}
+
+// FindAllWithExtension builds a Glob pattern using the base dir and the wanted
+// extension and finds any valid paths.
+func FindAllWithExtension(dir, ext string) ([]string, error) {
+	return filepath.Glob(fmt.Sprintf("%s/*.%s", dir, ext))
+}
+
+// FindAllWithExtensions uses [GetExtensionOrder] to build a list of globs and
+// search file matching files. The given directory is the base. The results are
+// the combined matches. If an error occurred, it is returned as well with an
+// early exit.
+func FindAllWithExtensions(dir string) ([]string, error) {
+	results := make([]string, 0)
+	var temp []string
+	var err error
+
+	for _, ext := range extensionOrder {
+		temp, err = FindAllWithExtension(dir, ext)
+		if err != nil {
+			return results, fmt.Errorf("cannot find files with extension %s: %s", ext, err.Error())
+		}
+
+		for i, _ := range temp {
+			results = append(results, temp[i])
+		}
+	}
+
+	return results, nil
 }
