@@ -108,9 +108,7 @@ func FindAllWithExtensions(dir string) ([]string, error) {
 			return results, fmt.Errorf("cannot find files with extension %s: %s", ext, err.Error())
 		}
 
-		for i, _ := range temp {
-			results = append(results, temp[i])
-		}
+		results = append(results, temp...)
 	}
 
 	return results, nil

@@ -23,15 +23,22 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"time"
 
+	"github.com/fatih/color"
+	"github.com/novafex/goral/fs"
+	"github.com/novafex/goral/gen"
+	"github.com/novafex/goral/utils"
 	"github.com/spf13/cobra"
 )
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate [declaration name]",
+	Use:     "generate [declaration name]",
 	Aliases: []string{"build", "compile"},
-	Short: "Generate Go files from declarations",
+	Short:   "Generate Go files from declarations",
 	Long: `Generate usable Go files from the declarations within the "./goral/*"
 directory. Each declaration file (.yaml | .json) is treated as an individual
 declaration for the purposes of building.
@@ -40,20 +47,82 @@ You can optionally provide a name for the declaration and only it will be
 generated instead of all of them.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+		var err error
+		var paths []string
+
+		if len(args) == 0 {
+			// Find them all
+			debugPrint("looking for any and all files in %s\n", gtd)
+			paths, err = fs.FindAllWithExtensions(gtd)
+			if err != nil {
+				color.HiRed("Failed to find declarations in %s", gtd)
+				color.Red(`Ensure the project is valid with "goral verify" or "goral init"`)
+				cobra.CheckErr(err)
+			}
+		} else {
+			// Use the provided names
+			debugPrint("using the provided arguments\n")
+			paths = make([]string, len(args))
+			var path string
+			for i, str := range args {
+				path = filepath.Join(gtd, utils.ToKebabCase(str))
+				debugPrint("looking for declaration %s\n", path)
+				if ok, ext := fs.FindPathWithExtensions(path); ok {
+					debugPrint("found declaration %s.%s\n", path, ext)
+					paths[i] = fs.CombineBaseExt(path, ext)
+				}
+			}
+		}
+
+		// Early return if no paths found
+		if len(paths) == 0 {
+			color.Yellow("No declaration files where found in directory %s", gtd)
+			return
+		}
+		paths = utils.CleanStringSlice(paths)
+
+		// Output for fun
+		color.Blue("Found %d declarations:", len(paths))
+		for i := range paths {
+			fmt.Printf("\t%s\n", paths[i])
+		}
+
+		// Check if the args don't match
+		if len(args) > 0 && len(paths) != len(args) {
+			color.Red("Mismatch on found paths, compared to arguments!")
+			color.Yellow("You asked for %d declarations, we only found %d", len(args), len(paths))
+			return
+		}
+
+		// Perf time check
+		start := time.Now()
+
+		// Run the processing, possibly in parallel mode
+		var errs []error
+		if ok, _ := cmd.Flags().GetBool("parallel"); ok {
+			errs = gen.ParallelProcessDeclarationFiles(paths)
+		} else {
+			// Run in single mode
+			errs = gen.ProcessDeclarationFiles(paths)
+		}
+
+		errs = utils.CleanErrorSlice(errs)
+		if len(errs) > 0 {
+			// Something went wrong.
+			color.HiRed("%d errors occurred while processing...", len(errs))
+			for i, err := range errs {
+				color.Red("%s - %s", paths[i], err.Error())
+			}
+			os.Exit(1)
+		}
+
+		perf := time.Since(start).Milliseconds()
+		color.HiGreen("Completed generation of %d declarations in %dms", len(paths), perf)
 	},
 }
 
 func init() {
+	generateCmd.Flags().BoolP("parallel", "p", false, "if provided all the declarations will be split into concurrent threads")
+
 	rootCmd.AddCommand(generateCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// generateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
