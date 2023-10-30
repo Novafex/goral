@@ -28,6 +28,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/novafex/goral/utils"
 )
 
 const (
@@ -44,12 +46,26 @@ var (
 	}
 )
 
+// CleanExtension checks if there is a preceding dot and removes it.
+func CleanExtension(ext string) string {
+	if ext[0] == '.' {
+		return ext[1:]
+	}
+	return ext
+}
+
 // GetExtensionOrder returns the static array of extensions (without dot) that
 // should be used to resolve files.
 //
 // These are decided statically so that all systems use the same order.
 func GetExtensionOrder() []string {
 	return extensionOrder
+}
+
+// IsValidExtension checks if the given extension (without dot) is considered
+// valid within [GetExtensionOrder].
+func IsValidExtension(ext string) bool {
+	return utils.StringSliceHas(extensionOrder, ext)
 }
 
 // DirExists returns ture if the given path exists and is a directory.

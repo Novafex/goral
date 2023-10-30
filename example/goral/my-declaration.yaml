@@ -1,8 +1,0 @@
-name: My Resource
-description: Enter your description of this resource type
-properties:
-    - name: Example
-      description: Super duper thing
-      type: boolean
-      optional: no
-      default: false

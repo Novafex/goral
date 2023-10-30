@@ -22,13 +22,48 @@
 // THE SOFTWARE.
 package gen
 
-import "github.com/novafex/goral/utils"
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/novafex/goral/decl"
+	"github.com/novafex/goral/fs"
+	"github.com/novafex/goral/utils"
+)
 
 func ProcessDeclarationFile(path string) error {
+	dcl := &decl.Declaration{}
+	if err := fs.Read(path, dcl); err != nil {
+		return err
+	}
+
+	data, err := GenerateStructFile(dcl)
+	if err != nil {
+		return err
+	}
+
+	dir := filepath.Dir(path)
+	filename := utils.ToKebabCase(dcl.Name)
+	finalPath := filepath.Join(dir, filename+".go")
+	if err := os.WriteFile(finalPath, data, 0644); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func ProcessDeclarationFiles(paths []string) []error {
+	errs := make([]error, 0)
+
+	for _, path := range paths {
+		if err := ProcessDeclarationFile(path); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 

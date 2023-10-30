@@ -17,6 +17,13 @@ func RemoveNonAlphanumeric(str string) string {
 	return bld.String()
 }
 
+func ToTitleCase(str string) string {
+	bld := strings.Builder{}
+	bld.WriteRune(unicode.ToTitle(rune(str[0])))
+	bld.WriteString(strings.ToLower(str[1:]))
+	return bld.String()
+}
+
 // ToKebabCase takes a string and breaks it up by spaces and rejoins as a alpha-
 // numeric string joined by dashes.
 //
@@ -27,4 +34,31 @@ func ToKebabCase(str string) string {
 		parts[i] = RemoveNonAlphanumeric(p)
 	}
 	return strings.Join(parts, "-")
+}
+
+func ToSnakeCase(str string) string {
+	parts := strings.Split(strings.ToLower(str), " ")
+	for i, p := range parts {
+		parts[i] = RemoveNonAlphanumeric(p)
+	}
+	return strings.Join(parts, "_")
+}
+
+func ToPascalCase(str string) string {
+	parts := strings.Split(strings.ToLower(str), " ")
+	for i, p := range parts {
+		parts[i] = ToTitleCase(RemoveNonAlphanumeric(p))
+	}
+	return strings.Join(parts, "")
+}
+
+func ToCamelCase(str string) string {
+	parts := strings.Split(strings.ToLower(str), " ")
+	for i, p := range parts {
+		parts[i] = RemoveNonAlphanumeric(p)
+		if i > 0 {
+			parts[i] = ToTitleCase(parts[i])
+		}
+	}
+	return strings.Join(parts, "_")
 }

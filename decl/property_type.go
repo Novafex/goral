@@ -72,6 +72,23 @@ func (pt PropertyType) MarshalYAML() (any, error) {
 	return pt.String(), nil
 }
 
+func (pt PropertyType) ToGo() string {
+	switch pt {
+	case PropertyTypeBoolean:
+		return "bool"
+	case PropertyTypeByte:
+		return "byte"
+	case PropertyTypeInteger:
+		return "int"
+	case PropertyTypeFloat:
+		return "float32"
+	case PropertyTypeString:
+		return "string"
+	default:
+		return "interface{}"
+	}
+}
+
 // UnmarshalText implements the text unmarshaler, which is used by most other
 // formats such as JSON to unmarshal string fields.
 //

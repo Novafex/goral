@@ -1,8 +1,11 @@
-name: My Resource
-description: Enter your description of this resource type
+name: Test
+description: This is my super cool testing struct for Goral development
 properties:
-    - name: Example
-      description: Enter a description of this property
-      type: boolean
-      optional: false
-      default: true
+    - name: Name
+      description: Cool name to give it
+      type: string
+    - name: Foo
+      description: Test property for optionals
+      type: string
+      optional: yes
+

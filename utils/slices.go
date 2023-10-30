@@ -1,5 +1,14 @@
 package utils
 
+func StringSliceHas(slice []string, tgt string) bool {
+	for _, tst := range slice {
+		if tst == tgt {
+			return true
+		}
+	}
+	return false
+}
+
 // FilterSlice takes a slice and a function to test. The test function is run
 // on every entry in the slice, if it returns true the entry is kept. It returns
 // the slice trimmed to size.
