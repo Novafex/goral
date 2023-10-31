@@ -56,6 +56,13 @@ func WriteNL(buf *bytes.Buffer) {
 	buf.WriteByte('\n')
 }
 
+// WriteIndent writes the number of spaces up to the indent property
+func WriteIndent(buf *bytes.Buffer, indent int) {
+	for i := 0; i < indent; i++ {
+		buf.WriteByte(' ')
+	}
+}
+
 // WriteLines takes a slice of byte-arrays and treats each one as a line of text.
 func WriteLines(buf *bytes.Buffer, content [][]byte) {
 	for _, line := range content {

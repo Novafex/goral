@@ -8,4 +8,9 @@ properties:
       description: Test property for optionals
       type: string
       optional: yes
+    - name: Something more realistic
+      description: This one is to test the casing and such
+      type: float
+      optional: yes
+
 

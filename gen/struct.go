@@ -18,10 +18,29 @@ func GenerateStructFile(dcl *decl.Declaration) ([]byte, error) {
 	file.License = []byte("Some dummy license")
 	file.Author = []byte("My Name")
 
-	file.AddSection(&gogen.Struct{
+	// Prepare struct
+	s := &gogen.Struct{
 		Comment: dcl.Description,
 		Name:    utils.ToPascalCase(dcl.Name),
-	})
+	}
+
+	// Prepare properties
+	var newField *gogen.Field
+	for _, prop := range dcl.Properties {
+		newField = &gogen.Field{
+			Comment:  prop.Description,
+			Name:     utils.ToPascalCase(prop.Name),
+			Type:     prop.Type.ToGo(),
+			Optional: prop.Optional,
+		}
+
+		newField.AddTag("json", utils.ToCamelCase(prop.Name))
+		newField.AddTag("sql", utils.ToSnakeCase(prop.Name))
+
+		s.AddField(newField)
+	}
+
+	file.AddSection(s)
 
 	if err := file.Generate(); err != nil {
 		return nil, err

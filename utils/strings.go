@@ -60,5 +60,5 @@ func ToCamelCase(str string) string {
 			parts[i] = ToTitleCase(parts[i])
 		}
 	}
-	return strings.Join(parts, "_")
+	return strings.Join(parts, "")
 }
