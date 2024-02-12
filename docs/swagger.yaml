@@ -1,0 +1,304 @@
+definitions:
+  goral.Advisor:
+    properties:
+      id:
+        description: Identifier for the object
+        type: string
+      name:
+        description: Name of the advisor
+        type: string
+      phoneNumber:
+        description: Contact phone number
+        type: string
+    type: object
+  goral.Customer:
+    properties:
+      advisor_id:
+        description: Advisor
+        type: string
+      id:
+        description: Identifier for the object
+        type: string
+      name:
+        description: Name of the customer
+        type: string
+      phoneNumber:
+        description: Contact phone number
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /advisor/create:
+    post:
+      description: Create CreateAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/createbulk:
+    post:
+      description: CreateBulk CreateBulkAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/delete:
+    delete:
+      description: Delete DeleteAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/deletebulk:
+    delete:
+      description: DeleteBulk DeleteBulkAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/get:
+    get:
+      description: Get GetAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/infinite:
+    get:
+      description: Infinite InfiniteAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/paginate:
+    get:
+      description: Paginate PaginateAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /advisor/update:
+    put:
+      description: Update UpdateAdvisor
+      parameters:
+      - description: Advisor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Advisor'
+      summary: Show Advisor
+      tags:
+      - Advisor
+  /customer/create:
+    post:
+      description: Create CreateCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/createbulk:
+    post:
+      description: CreateBulk CreateBulkCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/delete:
+    delete:
+      description: Delete DeleteCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/deletebulk:
+    delete:
+      description: DeleteBulk DeleteBulkCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/get:
+    get:
+      description: Get GetCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/infinite:
+    get:
+      description: Infinite InfiniteCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/paginate:
+    get:
+      description: Paginate PaginateCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+  /customer/update:
+    put:
+      description: Update UpdateCustomer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/goral.Customer'
+      summary: Show Customer
+      tags:
+      - Customer
+swagger: "2.0"

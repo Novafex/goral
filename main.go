@@ -64,6 +64,8 @@ func main() {
 	}
 	generateRouterFile(datas)
 	cmd := exec.Command("gofmt", "-w", ".")
+	cmd = exec.Command("swag", "init")
+	cmd = exec.Command("go", "mod", "tidy")
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -233,7 +235,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s   [GET]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
 			file.WriteString(fmt.Sprintf("var %s []%s\n\n", strings.ToLower(data.Name), "api_structure."+data.Name))
@@ -272,7 +274,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s  [GET]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
 			file.WriteString("\nreturn nil\n}")
@@ -283,7 +285,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s  [GET]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
 			file.WriteString("\nreturn nil\n}")
@@ -294,7 +296,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s  [POST]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString(fmt.Sprintf("data := %s{}\n\n", "api_structure."+data.Name))
 			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
@@ -314,7 +316,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s   [POST]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString(fmt.Sprintf("data := []%s{}\n\n", "api_structure."+data.Name))
 			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
@@ -334,7 +336,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s  [PUT]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
 			file.WriteString(fmt.Sprintf("editData:= %s{}\n\n", "api_structure."+data.Name))
@@ -361,7 +363,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s   [DELETE]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
 			file.WriteString(fmt.Sprintf("\n\nerr := controller.Svc.%s(id)\n\n", functionName))
@@ -384,7 +386,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
+			file.WriteString(fmt.Sprintf("// @Router  /%s/%s  [DELETE]\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
 			file.WriteString("\nreturn nil\n}")
@@ -440,5 +442,4 @@ func generateRouterFile(datas []Data) {
 		}
 	}
 	file.WriteString("\n\n}")
-
 }

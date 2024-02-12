@@ -1,0 +1,464 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/advisor/create": {
+            "post": {
+                "description": "Create CreateAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/createbulk": {
+            "post": {
+                "description": "CreateBulk CreateBulkAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/delete": {
+            "delete": {
+                "description": "Delete DeleteAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/deletebulk": {
+            "delete": {
+                "description": "DeleteBulk DeleteBulkAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/get": {
+            "get": {
+                "description": "Get GetAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/infinite": {
+            "get": {
+                "description": "Infinite InfiniteAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/paginate": {
+            "get": {
+                "description": "Paginate PaginateAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/advisor/update": {
+            "put": {
+                "description": "Update UpdateAdvisor",
+                "tags": [
+                    "Advisor"
+                ],
+                "summary": "Show Advisor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advisor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Advisor"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/create": {
+            "post": {
+                "description": "Create CreateCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/createbulk": {
+            "post": {
+                "description": "CreateBulk CreateBulkCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/delete": {
+            "delete": {
+                "description": "Delete DeleteCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/deletebulk": {
+            "delete": {
+                "description": "DeleteBulk DeleteBulkCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/get": {
+            "get": {
+                "description": "Get GetCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/infinite": {
+            "get": {
+                "description": "Infinite InfiniteCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/paginate": {
+            "get": {
+                "description": "Paginate PaginateCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        },
+        "/customer/update": {
+            "put": {
+                "description": "Update UpdateCustomer",
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Show Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goral.Customer"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "goral.Advisor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Identifier for the object",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the advisor",
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "description": "Contact phone number",
+                    "type": "string"
+                }
+            }
+        },
+        "goral.Customer": {
+            "type": "object",
+            "properties": {
+                "advisor_id": {
+                    "description": "Advisor",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Identifier for the object",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the customer",
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "description": "Contact phone number",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
