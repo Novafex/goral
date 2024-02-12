@@ -42,7 +42,7 @@ type Data struct {
 }
 
 func main() {
-	var data Data
+	var datas []Data
 
 	jsonFile, err := os.Open("data.json")
 	if err != nil {
@@ -53,15 +53,16 @@ func main() {
 
 	byteValue, _ := io.ReadAll(jsonFile)
 
-	json.Unmarshal(byteValue, &data)
+	json.Unmarshal(byteValue, &datas)
 
 	// Klasörleri oluştur
-	createDirectories([]string{"goral"})
-
-	generateStructFile(data)
-	generateServiceFile(data)
-	generateControllerFile(data)
-
+	createDirectories([]string{"goral", "goral/controllers", "goral/services", "goral/structures"})
+	for _, data := range datas {
+		generateStructFile(data)
+		generateServiceFile(data)
+		generateControllerFile(data)
+	}
+	generateRouterFile(datas)
 	cmd := exec.Command("gofmt", "-w", ".")
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
@@ -84,7 +85,8 @@ func createFieldTags(fieldName, columnName, typeName string) (string, string) {
 }
 
 func generateStructFile(data Data) {
-	fileName := "goral/" + strings.ToLower(data.Name) + "_types.go"
+	filePath := "goral/structures/"
+	fileName := filePath + strings.ToLower(data.Name) + "_types.go"
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatalf("Dosya oluşturma hatası: %v", err)
@@ -113,7 +115,7 @@ func generateStructFile(data Data) {
 }
 
 func generateServiceFile(data Data) {
-	fileName := "goral/" + strings.ToLower(data.Name) + "_services.go"
+	fileName := "goral/services/" + strings.ToLower(data.Name) + "_services.go"
 	file, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println("Dosya oluşturma hatası:", err)
@@ -125,6 +127,7 @@ func generateServiceFile(data Data) {
 	file.WriteString(`import (
         "gorm.io/gorm" 
 		"gorm.io/gorm/clause"
+		api_structure "generate/goral/structures"
     )`)
 	file.WriteString(fmt.Sprintf("\n\n type I%s interface {\n", data.Name))
 
@@ -133,17 +136,17 @@ func generateServiceFile(data Data) {
 
 		switch action {
 		case "Get":
-			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Paginate":
-			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Infinite":
-			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("%s(filter %s) ([]%s, error) \n", funcName, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Create":
-			file.WriteString(fmt.Sprintf("%s(data %s) (%s, error) \n", funcName, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("%s(data %s) (%s, error) \n", funcName, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Create_bulk":
-			file.WriteString(fmt.Sprintf("%s(data []%s) ([]%s, error) \n", funcName, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("%s(data []%s) ([]%s, error) \n", funcName, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Update":
-			file.WriteString(fmt.Sprintf("%s(id int, data %s) error\n", funcName, data.Name))
+			file.WriteString(fmt.Sprintf("%s(id int, data %s) error\n", funcName, "api_structure."+data.Name))
 		case "Delete":
 			file.WriteString(fmt.Sprintf("%s(id int) error \n", funcName))
 		case "Delete_bulk":
@@ -160,40 +163,40 @@ func generateServiceFile(data Data) {
 		file.WriteString(fmt.Sprintf("func (c *%sService) %s", data.Name, funcName))
 		switch action {
 		case "Get":
-			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) { \n", data.Name, data.Name))
-			file.WriteString(fmt.Sprintf("result := []%s{} \n", data.Name))
+			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) { \n", "api_structure."+data.Name, "api_structure."+data.Name))
+			file.WriteString(fmt.Sprintf("result := []%s{} \n", "api_structure."+data.Name))
 			file.WriteString("var err error \n")
-			file.WriteString(fmt.Sprintf("if err = c.DB.Preload(clause.Associations).Model(&%s{}).Where(filter).Find(&result).Error; err != nil { \nreturn result, err \n}", data.Name))
+			file.WriteString(fmt.Sprintf("if err = c.DB.Preload(clause.Associations).Model(&%s{}).Where(filter).Find(&result).Error; err != nil { \nreturn result, err \n}", "api_structure."+data.Name))
 			file.WriteString("\nreturn result, err} \n\n")
 		case "Paginate":
-			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) {return []%s{},nil \n}\n\n", data.Name, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) {return []%s{},nil \n}\n\n", "api_structure."+data.Name, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Infinite":
-			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) {return []%s{},nil \n}\n\n", data.Name, data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("(filter %s) ([]%s, error) {return []%s{},nil \n}\n\n", "api_structure."+data.Name, "api_structure."+data.Name, "api_structure."+data.Name))
 		case "Create":
-			file.WriteString(fmt.Sprintf("(data %s) (%s, error) { \n", data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("(data %s) (%s, error) { \n", "api_structure."+data.Name, "api_structure."+data.Name))
 			file.WriteString("var err error \n")
 			file.WriteString("if err =  c.DB.Create(&data).Error; err != nil { \nreturn data, err \n}")
 			file.WriteString("\nreturn data, err} \n\n")
 		case "CreateBulk":
-			file.WriteString(fmt.Sprintf("(data []%s) ([]%s, error) { \n", data.Name, data.Name))
+			file.WriteString(fmt.Sprintf("(data []%s) ([]%s, error) { \n", "api_structure."+data.Name, "api_structure."+data.Name))
 			file.WriteString("var err error \n")
 			file.WriteString("if err = c.DB.CreateInBatches(&data, len(data)).Error; err != nil { \nreturn data, err \n}")
 			file.WriteString("\nreturn data, err} \n\n")
 		case "Update":
-			file.WriteString(fmt.Sprintf("(id int, data %s) error {\n\n", data.Name))
+			file.WriteString(fmt.Sprintf("(id int, data %s) error {\n\n", "api_structure."+data.Name))
 			file.WriteString("var err error \n")
-			file.WriteString(fmt.Sprintf("if err = c.DB.Model(%s{}).Where(\"id = ?\", id).Updates(&data).Error; err != nil {\nreturn err\n}", data.Name))
+			file.WriteString(fmt.Sprintf("if err = c.DB.Model(%s{}).Where(\"id = ?\", id).Updates(&data).Error; err != nil {\nreturn err\n}", "api_structure."+data.Name))
 			file.WriteString("\nreturn err} \n\n")
 		case "Delete":
 			file.WriteString("(id int) error { \n")
 			file.WriteString("var err error \n")
-			file.WriteString(fmt.Sprintf("if err = c.DB.Where(\"id = ?\", id).Delete(&%s{}).Error; err != nil { \nreturn err \n}", data.Name))
+			file.WriteString(fmt.Sprintf("if err = c.DB.Where(\"id = ?\", id).Delete(&%s{}).Error; err != nil { \nreturn err \n}", "api_structure."+data.Name))
 			file.WriteString("\nreturn err} \n\n")
 		case "DeleteBulk":
 			file.WriteString("(ids []int) error {\n")
 			file.WriteString("var err error \n")
 			file.WriteString("for _, id := range ids {\n")
-			file.WriteString(fmt.Sprintf("if err = c.DB.Where(\"id = ?\", id).Delete(&%s{}).Error; err != nil {\nreturn err\n}\n}", data.Name))
+			file.WriteString(fmt.Sprintf("if err = c.DB.Where(\"id = ?\", id).Delete(&%s{}).Error; err != nil {\nreturn err\n}\n}", "api_structure."+data.Name))
 			file.WriteString("\nreturn err} \n\n")
 		}
 	}
@@ -202,7 +205,7 @@ func generateServiceFile(data Data) {
 }
 
 func generateControllerFile(data Data) {
-	fileName := "goral/" + strings.ToLower(data.Name) + "_endpoints.go"
+	fileName := "goral/controllers/" + strings.ToLower(data.Name) + "_endpoints.go"
 	file, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println("Dosya oluşturma hatası:", err)
@@ -214,9 +217,11 @@ func generateControllerFile(data Data) {
 	file.WriteString(`import (
         "github.com/gofiber/fiber/v2"
 		"strconv"
+		api_service "generate/goral/services"
+		api_structure "generate/goral/structures"
     )`)
 
-	file.WriteString(fmt.Sprintf("\n\n type %sController struct{ Svc %sService }\n", data.Name, data.Name))
+	file.WriteString(fmt.Sprintf("\n\n type %sController struct{ Svc %sService }\n", data.Name, "api_service."+data.Name))
 
 	for _, action := range data.Actions {
 		functionName := action + data.Name
@@ -227,11 +232,11 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
-			file.WriteString(fmt.Sprintf("var %s []%s\n\n", strings.ToLower(data.Name), data.Name))
+			file.WriteString(fmt.Sprintf("var %s []%s\n\n", strings.ToLower(data.Name), "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("db := controller.Svc.DB.Table(\"%s\")\n", data.Name))
 			file.WriteString("query := c.Query(\"query\")\n")
 			var queryParts []string
@@ -266,7 +271,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
@@ -277,7 +282,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 
@@ -288,10 +293,10 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-			file.WriteString(fmt.Sprintf("data := %s{}\n\n", data.Name))
+			file.WriteString(fmt.Sprintf("data := %s{}\n\n", "api_structure."+data.Name))
 			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
 			file.WriteString(fmt.Sprintf("\n\nresult, rerr := controller.Svc.%s(data)\n", functionName))
 			file.WriteString(`
@@ -308,10 +313,10 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
-			file.WriteString(fmt.Sprintf("data := []%s{}\n\n", data.Name))
+			file.WriteString(fmt.Sprintf("data := []%s{}\n\n", "api_structure."+data.Name))
 			file.WriteString("if err := c.BodyParser(&data); err != nil {\nreturn c.Status(fiber.StatusBadRequest).JSON(fiber.Map{\n\"type\":    \"Invalid Data\",\n\"message\": err.Error(),\n})\n}")
 			file.WriteString(fmt.Sprintf("\n\nresult, rerr := controller.Svc.%s(data)\n", functionName))
 			file.WriteString(`
@@ -328,11 +333,11 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
-			file.WriteString(fmt.Sprintf("editData:= %s{}\n\n", data.Name))
+			file.WriteString(fmt.Sprintf("editData:= %s{}\n\n", "api_structure."+data.Name))
 			file.WriteString(`if err := c.BodyParser(&editData); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"type": "Invalid Data",
@@ -355,7 +360,7 @@ func generateControllerFile(data Data) {
 			file.WriteString(fmt.Sprintf("// @Description %s %s\n", action, functionName))
 			file.WriteString(fmt.Sprintf("// @Tags %s\n", data.Name))
 			file.WriteString(fmt.Sprintf("// @Param id path string true \"%s ID\"\n", data.Name))
-			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", data.Name))
+			file.WriteString(fmt.Sprintf("// @Success 200 {object} %s\n", "api_structure."+data.Name))
 			file.WriteString(fmt.Sprintf("// @Router /test/%s/%s\n", strings.ToLower(data.Name), strings.ToLower(action)))
 			file.WriteString(fmt.Sprintf("func (controller *%sController) %s(c *fiber.Ctx) error { \n", data.Name, functionName))
 			file.WriteString("id, _ := strconv.Atoi(c.Params(\"id\"))\n\n")
@@ -388,4 +393,52 @@ func generateControllerFile(data Data) {
 	}
 
 	fmt.Printf("%s dosyası başarıyla oluşturuldu.\n", fileName)
+}
+
+func generateRouterFile(datas []Data) {
+	fileName := "goral/goral.go"
+	file, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println("Dosya oluşturma hatası:", err)
+		return
+	}
+	defer file.Close()
+
+	file.WriteString("package goral\n\n")
+	file.WriteString(`import (
+        "github.com/gofiber/fiber/v2"
+		api_service "generate/goral/services"
+		api_controller "generate/goral/controllers"
+		"gorm.io/gorm"
+    )`)
+	file.WriteString(fmt.Sprintf("\nfunc Run(app fiber.Router, DB *gorm.DB,) { \n\n"))
+	for _, data := range datas {
+		file.WriteString(fmt.Sprintf("\n\n%s := api_controller.%sController{Svc: api_service.%sService{DB: DB}} \n", data.Name, data.Name, data.Name))
+		appName := "app_" + data.Name
+		file.WriteString(fmt.Sprintf("%s:=app.Group(\"/%s\")\n", appName, strings.ToLower(data.Name)))
+		for _, action := range data.Actions {
+			functionName := action + data.Name
+			switch action {
+			case "Get":
+				file.WriteString(fmt.Sprintf("%s.Get(\"/%s\", %s.%s)\n", appName, strings.ToLower(action), data.Name, functionName))
+			case "Paginate":
+				file.WriteString(fmt.Sprintf("%s.Get(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "Infinite":
+				file.WriteString(fmt.Sprintf("%s.Get(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "Create":
+				file.WriteString(fmt.Sprintf("%s.Post(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "CreateBulk":
+				file.WriteString(fmt.Sprintf("%s.Post(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "Update":
+				file.WriteString(fmt.Sprintf("%s.Put(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "Delete":
+				file.WriteString(fmt.Sprintf("%s.Delete(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			case "DeleteBulk":
+				file.WriteString(fmt.Sprintf("%s.Delete(\"/%s\", %s.%s) \n", appName, strings.ToLower(action), data.Name, functionName))
+			}
+
+		}
+	}
+	file.WriteString("\n\n}")
+
 }
