@@ -15,3 +15,5 @@ Go tool for generating CRUD back-ends services using a unified manifest file for
   - `task/*` for mundane tasks like linting or small refactors
 
 Work in the develop and prefixed branches only. When we are ready, we will merge into `beta` and then `main` with their respective PRs and tags.
+
+go get github.com/golang/mock/mockgen/model

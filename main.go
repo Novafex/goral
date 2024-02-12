@@ -42,34 +42,52 @@ type Data struct {
 }
 
 func main() {
-	var datas []Data
 
-	jsonFile, err := os.Open("data.json")
-	if err != nil {
-		fmt.Println(err)
+	var first string
+	fmt.Println("Process: \n1- data \n2- integration")
+	fmt.Scanln(&first)
+	if first == "1" {
+		var datas []Data
+		jsonFile, err := os.Open("data.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("Successfully Opened data.json")
+		defer jsonFile.Close()
+
+		byteValue, _ := io.ReadAll(jsonFile)
+
+		json.Unmarshal(byteValue, &datas)
+
+		// Klasörleri oluştur
+		createDirectories([]string{"goral", "goral/controllers", "goral/services", "goral/structures"})
+		for _, data := range datas {
+			generateStructFile(data)
+			generateServiceFile(data)
+			generateControllerFile(data)
+		}
+		generateRouterFile(datas)
+		// gofmt komutunu çalıştır
+		gofmtCmd := exec.Command("gofmt", "-w", ".")
+		if err := gofmtCmd.Run(); err != nil {
+			log.Fatal(err)
+		}
+		// swag init komutunu çalıştır
+		swagCmd := exec.Command("swag", "init")
+		if err := swagCmd.Run(); err != nil {
+			log.Fatal(err)
+		}
+		// go generate komutunu çalıştır
+		generateCmd := exec.Command("go", "generate", "./goral/services")
+		if err := generateCmd.Run(); err != nil {
+			log.Fatal(err)
+		}
+	} else if first == "2" {
+		log.Println("Integration being developed.")
+	} else {
+		log.Println("WARNING!!!")
 	}
-	fmt.Println("Successfully Opened data.json")
-	defer jsonFile.Close()
-
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	json.Unmarshal(byteValue, &datas)
-
-	// Klasörleri oluştur
-	createDirectories([]string{"goral", "goral/controllers", "goral/services", "goral/structures"})
-	for _, data := range datas {
-		generateStructFile(data)
-		generateServiceFile(data)
-		generateControllerFile(data)
-	}
-	generateRouterFile(datas)
-	cmd := exec.Command("gofmt", "-w", ".")
-	cmd = exec.Command("swag", "init")
-	cmd = exec.Command("go", "mod", "tidy")
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
-
 }
 
 func createDirectories(directories []string) {
@@ -131,7 +149,10 @@ func generateServiceFile(data Data) {
 		"gorm.io/gorm/clause"
 		api_structure "generate/goral/structures"
     )`)
-	file.WriteString(fmt.Sprintf("\n\n type I%s interface {\n", data.Name))
+	file.WriteString(fmt.Sprintf("\n //go:generate mockgen -destination=../mocks/services/%s.go -package=goral generate/goral/services I%s\n", strings.ToLower(data.Name), data.Name))
+
+	file.WriteString(fmt.Sprintf("type %sService struct{ DB *gorm.DB }\n", data.Name))
+	file.WriteString(fmt.Sprintf("\n type I%s interface {\n", data.Name))
 
 	for _, action := range data.Actions {
 		funcName := action + data.Name
@@ -157,8 +178,6 @@ func generateServiceFile(data Data) {
 	}
 
 	file.WriteString("}\n")
-
-	file.WriteString(fmt.Sprintf("type %sService struct{ DB *gorm.DB }\n", data.Name))
 
 	for _, action := range data.Actions {
 		funcName := action + data.Name
